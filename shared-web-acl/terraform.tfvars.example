@@ -1,0 +1,39 @@
+# Copy to terraform.tfvars and edit. terraform.tfvars is gitignored.
+#
+# This root is applied from here and only here:
+#
+#   terraform init
+#   terraform apply
+#   terraform output web_acl_arn
+#
+# State lives in s3://vau-terraform-state-bucket under
+# vau-infra/shared-web-acl/, so any machine with the tg profile can manage it.
+
+# Named profile from ~/.aws/config. Omit to use the ambient credential chain.
+aws_profile = "tg"
+
+# Terraform refuses to run if the resolved credentials belong to a different
+# account. Every distribution association and every deployment points at this
+# ACL's ARN, so an ACL built in the wrong account fails them all.
+aws_account_id = "518875398948"
+
+# The region is not configurable: a CLOUDFRONT-scoped Web ACL can only be
+# created in us-east-1, and the provider in main.tf pins it there.
+
+# ---------------------------------------------------------------------------
+# Optional
+# ---------------------------------------------------------------------------
+
+# Name of the Web ACL. Account-level, not per-site.
+# name = "shared-signups"
+
+# Requests permitted per evaluation window, per source IP per host.
+# AWS WAF's minimum is 10.
+# rate_limit_requests = 20
+
+# Evaluation window in seconds. AWS WAF accepts only 60, 120, 300 or 600.
+# rate_limit_window_seconds = 60
+
+# tags = {
+#   project = "vau-infra"
+# }

@@ -1,0 +1,13 @@
+# Terraform working files. State is remote (S3); nothing here should hold it.
+.terraform/
+*.tfstate
+*.tfstate.*
+
+# Per-machine variable values. Commit only the .example files.
+*.tfvars
+!*.tfvars.example
+
+# Lock files ARE committed: these roots are applied, not vendored.
+!.terraform.lock.hcl
+
+.idea
