@@ -169,7 +169,7 @@ resource "aws_wafv2_web_acl" "shared" {
 
             statement {
               byte_match_statement {
-                search_string         = "/v1/signups"
+                search_string         = "/vau-maillist/v1/signups"
                 positional_constraint = "EXACTLY"
 
                 field_to_match {
