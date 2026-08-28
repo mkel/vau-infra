@@ -1,0 +1,32 @@
+# Copy to terraform.tfvars and edit. terraform.tfvars is gitignored.
+#
+# This root is applied from here and only here:
+#
+#   terraform init
+#   terraform plan   # first plan: 5 imports, 0 changes. Anything else is wrong.
+#   terraform apply
+#
+# State lives in s3://vau-terraform-state-bucket under
+# vau-infra/vauvideo-projects-bucket/, so any machine with the tg profile can
+# manage it.
+
+# Named profile from ~/.aws/config. Omit to use the ambient credential chain.
+aws_profile = "tg"
+
+# Terraform refuses to run if the resolved credentials belong to a different
+# account. Every project's CloudFront origin points at this bucket, so a
+# bucket managed in the wrong account fails them all.
+aws_account_id = "518875398948"
+
+# ---------------------------------------------------------------------------
+# Optional
+# ---------------------------------------------------------------------------
+
+# Name of the shared projects bucket. Account-level, not per-project.
+# bucket_name = "vauvideo-projects"
+
+# Extra tags applied to every resource via provider default_tags. The
+# bucket's own pre-existing tags are set in main.tf, not here.
+# tags = {
+#   project = "vau-infra"
+# }
