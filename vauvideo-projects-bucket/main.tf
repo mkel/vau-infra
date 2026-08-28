@@ -101,6 +101,19 @@ locals {
       distribution_id = "E1ZJEE25ZL29U0"
     },
   ]
+
+  # Distributions that additionally get s3:ListBucket. Unlike GetObject, a
+  # ListBucket grant is on the bucket itself and cannot be narrowed to one
+  # prefix by Resource, so a distribution listed here can enumerate every
+  # project's prefix, not only its own. CloudFront needs it to get a 404
+  # instead of a 403 for a missing key; keep the list to distributions that
+  # actually require that.
+  cloudfront_listers = [
+    {
+      sid             = "AllowCloudFrontReadStemmixrList"
+      distribution_id = "E16GYWW6DQ63V"
+    },
+  ]
 }
 
 resource "aws_s3_bucket" "projects" {
@@ -166,22 +179,40 @@ resource "aws_s3_bucket_policy" "projects" {
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [
-      for reader in local.cloudfront_readers : {
-        Sid    = reader.sid
-        Effect = "Allow"
-        Principal = {
-          Service = "cloudfront.amazonaws.com"
-        }
-        Action   = "s3:GetObject"
-        Resource = "${aws_s3_bucket.projects.arn}/${reader.prefix}/*"
-        Condition = {
-          StringEquals = {
-            "AWS:SourceArn" = "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/${reader.distribution_id}"
+    Statement = concat(
+      [
+        for reader in local.cloudfront_readers : {
+          Sid    = reader.sid
+          Effect = "Allow"
+          Principal = {
+            Service = "cloudfront.amazonaws.com"
+          }
+          Action   = "s3:GetObject"
+          Resource = "${aws_s3_bucket.projects.arn}/${reader.prefix}/*"
+          Condition = {
+            StringEquals = {
+              "AWS:SourceArn" = "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/${reader.distribution_id}"
+            }
           }
         }
-      }
-    ]
+      ],
+      [
+        for lister in local.cloudfront_listers : {
+          Sid    = lister.sid
+          Effect = "Allow"
+          Principal = {
+            Service = "cloudfront.amazonaws.com"
+          }
+          Action   = "s3:ListBucket"
+          Resource = aws_s3_bucket.projects.arn
+          Condition = {
+            StringEquals = {
+              "AWS:SourceArn" = "arn:aws:cloudfront::${data.aws_caller_identity.current.account_id}:distribution/${lister.distribution_id}"
+            }
+          }
+        }
+      ],
+    )
   })
 }
 
