@@ -100,6 +100,11 @@ locals {
       prefix          = "vau-maillist"
       distribution_id = "E1ZJEE25ZL29U0"
     },
+    {
+      sid             = "AllowCloudFrontReadDenttiTest"
+      prefix          = "dentti/test"
+      distribution_id = "E90WQYZ7S0TNP"
+    },
   ]
 
   # Distributions that additionally get s3:ListBucket. Unlike GetObject, a
@@ -112,6 +117,10 @@ locals {
     {
       sid             = "AllowCloudFrontReadStemmixrList"
       distribution_id = "E16GYWW6DQ63V"
+    },
+    {
+      sid             = "AllowCloudFrontListDenttiTest"
+      distribution_id = "E90WQYZ7S0TNP"
     },
   ]
 }
